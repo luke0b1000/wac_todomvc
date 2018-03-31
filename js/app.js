@@ -121,14 +121,19 @@ jQuery(function ($) {
 		},
 		// accepts an element from inside the `.item` div and
 		// returns the corresponding index in the `todos` array
-		getIndexFromEl: function (el) {
-			var id = $(el).closest('li').data('id');
-			var todos = this.todos;
-			var i = todos.length;
+		/**
+		 * 	It should return the this.todos index based on what was clicked.
+		 * 	Parameters: el ==> html element that was actioned on
+		 * 	Return: i ==> index of this.todos
+		 */
+		getIndexFromEl: function (el) {		// from destroy: <button class="destroy"></button>
+			var id = $(el).closest('li').data('id');	// element that was clicked, it's ancestor that was li and get the data-id
+			var todos = this.todos;		// set this.todos to local todos
+			var i = todos.length;		// number of todos
 
-			while (i--) {
-				if (todos[i].id === id) {
-					return i;
+			while (i--) {		// loop through the todos starting at the end  // if i is 1, it will be true and decrement at the same time, making it 0 as it enters the loop, thus the next time will be 0 and false so loop stops
+				if (todos[i].id === id) {		// if todos[i].id equal to the id we are looking for
+					return i;					// return the i
 				}
 			}
 		},
@@ -187,8 +192,15 @@ jQuery(function ($) {
 
 			this.render();
 		},
-		destroy: function (e) {
-			this.todos.splice(this.getIndexFromEl(e.target), 1);
+
+		/**
+		 *  It should delete one item from the this.todos based on index of a click
+		 * 	and update the page
+		 *	Parameters: e ==> jQuery Event object [https://api.jquery.com/category/events/event-object/]
+		 *	Return: N/A
+		 */
+		destroy: function (e) {										
+			this.todos.splice(this.getIndexFromEl(e.target), 1);	// delete one item that was click from this.todos // <button class="destroy"></button>
 			this.render();
 		}
 	};
