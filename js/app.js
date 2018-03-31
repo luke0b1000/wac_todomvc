@@ -2,12 +2,15 @@
 jQuery(function ($) {
 	'use strict';
 
+	// used in footer template to display the selected filter {{#eq filter 'all'}}class="selected"{{/eq}}
+	// created a new helper called 'eq' custom behavior, comparing filter to 'all','active','completed'
+	// this is only ONLY has this.footerTemplate object stuff, activeTodoCount, activeTodoWord, completedTodos, filter
 	Handlebars.registerHelper('eq', function (a, b, options) {
-		return a === b ? options.fn(this) : options.inverse(this);
+		return a === b ? options.fn(this) : options.inverse(this); // options.fn(this): *** class="selected" *** , options.inverse(this): ""  // options.fn returns the true part of the block, options.inverse returns the else part of the block if there was one here
 	});
 
-	var ENTER_KEY = 13;
-	var ESCAPE_KEY = 27;
+	var ENTER_KEY = 13;		// used by this.create and this.editKeyup e.which is what is typed
+	var ESCAPE_KEY = 27;	// used by this.editKeyup
 
 	var util = {
 		/**
@@ -33,7 +36,7 @@ jQuery(function ($) {
 		/**
 		 * 	It should add a 's' if count doesn't equal 1, otherwise don't add an 's' because count equals to 1
 		 *	Parameters: count (string), word (string)
-		 *	Return: count (string)
+		 *	Return: word (string) with 's' or without
 		 */
 		pluralize: function (count, word) {
 			return count === 1 ? word : word + 's';
@@ -51,7 +54,7 @@ jQuery(function ($) {
 	var App = {
 		init: function () {
 			this.todos = util.store('todos-jquery');
-			this.todoTemplate = Handlebars.compile($('#todo-template').html());
+			this.todoTemplate = Handlebars.compile($('#todo-template').html());		// get <script id="todo-template" and the html and turn it into handlebars template
 			this.footerTemplate = Handlebars.compile($('#footer-template').html());
 			this.bindEvents();		// Create event listeners for all the possible actions
 
@@ -78,26 +81,36 @@ jQuery(function ($) {
 				.on('focusout', '.edit', this.update.bind(this))		// leaving focus such as esc
 				.on('click', '.destroy', this.destroy.bind(this));		// one click on class="destroy"
 		},
+		/**
+		 * 	It should display and update the view, every time the this.todos is modified.
+		 *	Parameters: N/A
+		 *	Return: N/A
+		 */
 		render: function () {
-			var todos = this.getFilteredTodos();		// this todos is more like a local todos and what you want displayed, this doesn't mess with this.todos which is coming from localStorage // get this.todos from localStorage and then set based on needs to var todos
-			$('.todo-list').html(this.todoTemplate(todos));
-			$('.main').toggle(todos.length > 0);
-			$('.toggle-all').prop('checked', this.getActiveTodos().length === 0);
-			this.renderFooter();
-			$('.new-todo').focus();
-			util.store('todos-jquery', this.todos);
+			var todos = this.getFilteredTodos();		// this todos is more like a local todos and what you want displayed, this doesn't mess with this.todos which is coming from localStorage // get this.todos from localStorage and then set based on needs to var todos // used for display
+			$('.todo-list').html(this.todoTemplate(todos));	// get the todos that we want, then filling out the template (this.todoTemplate), once filled out, putting it in <ul class="todo-list"></ul> html element
+			$('.main').toggle(todos.length > 0);		// as long as there are todos, then display <section class="main">, otherwise hide it
+			$('.toggle-all').prop('checked', this.getActiveTodos().length === 0);	// set <input id="toggle-all" class="toggle-all" type="checkbox"> property of check to true if everything is completed/active todos is equal to zero
+			this.renderFooter();		// run this.renderFooter()
+			$('.new-todo').focus();		// Bring to focus <input class="new-todo" placeholder="What needs to be done?" autofocus> so you can start typing the next element
+			util.store('todos-jquery', this.todos);		// use localStorage to store key:todos-jquery value:this.todos
 		},
+		/**
+		 * 	It should display and update the footer, called from this.render()
+		 *	Parameters: N/A
+		 *	Return: N/A
+		 */
 		renderFooter: function () {
-			var todoCount = this.todos.length;
-			var activeTodoCount = this.getActiveTodos().length;
-			var template = this.footerTemplate({
+			var todoCount = this.todos.length;		// how many todos are there
+			var activeTodoCount = this.getActiveTodos().length;		// how many active todos are there
+			var template = this.footerTemplate({			// fill out this.footerTemplate with information below
 				activeTodoCount: activeTodoCount,
-				activeTodoWord: util.pluralize(activeTodoCount, 'item'),
-				completedTodos: todoCount - activeTodoCount,
-				filter: this.filter
+				activeTodoWord: util.pluralize(activeTodoCount, 'item'),	// add 's' to 'item' if activeTodoCount doesn't equal to 1
+				completedTodos: todoCount - activeTodoCount,		// alternative can use above this.getCompletedTodos().length // if there is value then the template will be true and show clear completed on html
+				filter: this.filter			// Depending on the this.filter, it will only be true and class="selected" will be add to the element
 			});
 
-			$('.footer').toggle(todoCount > 0).html(template);
+			$('.footer').toggle(todoCount > 0).html(template);	// display the <footer class="footer"></footer> if there are todos and 
 		},
 		/**
 		 * 	It should change all this.todos.completed based on id="toggle-all" if it has checked exist true / else false
@@ -147,7 +160,7 @@ jQuery(function ($) {
 				return this.getCompletedTodos();
 			}
 
-			return this.todos;		// basically this.filter === 'all' and return al the todos
+			return this.todos;		// basically this.filter === 'all' and return all the todos
 		},
 		/**
 		 * 	It should set this.todos to this.todos.completed that are false and set this.filter to all
@@ -232,7 +245,7 @@ jQuery(function ($) {
 			}
 
 			if (e.which === ESCAPE_KEY) {				// if you press ESC
-				$(e.target).data('abort', true).blur();		// set the element to have data with key to 'abort' and value is true, and lose focus
+				$(e.target).data('abort', true).blur();		// set the element to have data with key to 'abort' and value is true, and lose focus // this data with key:'abort' value:true is used by the this.update to determine if it wants to put this value into this.todos or not
 			}
 		},
 		/**
@@ -246,11 +259,11 @@ jQuery(function ($) {
 			var val = $el.val().trim();		// get the value of the element
 
 			if (!val) {						// if no value or empty space delete
-				this.destroy(e);
+				this.destroy(e);			// if nothing type in, then delete
 				return;
 			}
 
-			if ($el.data('abort')) {		// if this was set to true from editKeyup
+			if ($el.data('abort')) {		// if this was set to true from this.editKeyup then goto next line
 				$el.data('abort', false);	// set the value to false and don't update and do nothing more
 			} else {
 				this.todos[this.getIndexFromEl(el)].title = val;	// set the value of this.todos[i]
