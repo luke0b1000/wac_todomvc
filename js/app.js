@@ -43,7 +43,7 @@ jQuery(function ($) {
 			this.todos = util.store('todos-jquery');
 			this.todoTemplate = Handlebars.compile($('#todo-template').html());
 			this.footerTemplate = Handlebars.compile($('#footer-template').html());
-			this.bindEvents();
+			this.bindEvents();		// Create event listeners for all the possible actions
 
 			new Router({
 				'/:filter': function (filter) {
@@ -52,19 +52,24 @@ jQuery(function ($) {
 				}.bind(this)
 			}).init('/all');
 		},
+		/**
+		 * 	It should bind each HTML element to an action and run a specific function. this === App object {} // the this is App object pass into the bind(this), which pass into the method, otherwise inside that method this, refers to the element clicked
+		 *	Parameters: N/A
+		 *	Return: N/A
+		 */
 		bindEvents: function () {
-			$('.new-todo').on('keyup', this.create.bind(this));
-			$('.toggle-all').on('change', this.toggleAll.bind(this));
-			$('.footer').on('click', '.clear-completed', this.destroyCompleted.bind(this));
-			$('.todo-list')
-				.on('change', '.toggle', this.toggle.bind(this))
-				.on('dblclick', 'label', this.editingMode.bind(this))
-				.on('keyup', '.edit', this.editKeyup.bind(this))
-				.on('focusout', '.edit', this.update.bind(this))
-				.on('click', '.destroy', this.destroy.bind(this));
+			$('.new-todo').on('keyup', this.create.bind(this));		// id="new-todo" lifting up from key press
+			$('.toggle-all').on('change', this.toggleAll.bind(this));		// id="toggle-all" any change on that element
+			$('.footer').on('click', '.clear-completed', this.destroyCompleted.bind(this));		// id="footer" if you click on id="clear-completed"
+			$('.todo-list')			// id="todo-list"  // method chaining
+				.on('change', '.toggle', this.toggle.bind(this))		// any change on class="toggle"
+				.on('dblclick', 'label', this.editingMode.bind(this))	// double clicking on element <label>
+				.on('keyup', '.edit', this.editKeyup.bind(this))		// lifting from the key press on class="edit"
+				.on('focusout', '.edit', this.update.bind(this))		// leaving focus such as esc
+				.on('click', '.destroy', this.destroy.bind(this));		// one click on class="destroy"
 		},
 		render: function () {
-			var todos = this.getFilteredTodos();
+			var todos = this.getFilteredTodos();		// this todos is more like a local todos and what you want displayed, this doesn't mess with this.todos which is coming from localStorage // get this.todos from localStorage and then set based on needs to var todos
 			$('.todo-list').html(this.todoTemplate(todos));
 			$('.main').toggle(todos.length > 0);
 			$('.toggle-all').prop('checked', this.getActiveTodos().length === 0);
@@ -84,25 +89,45 @@ jQuery(function ($) {
 
 			$('.footer').toggle(todoCount > 0).html(template);
 		},
+		/**
+		 * 	It should change all this.todos.completed based on id="toggle-all" if it has checked exist true / else false
+		 *	Parameters: e (jQuery Event Object)
+		 *	Return: N/A
+		 */
 		toggleAll: function (e) {
-			var isChecked = $(e.target).prop('checked');
+			var isChecked = $(e.target).prop('checked');	// isChecked is equal to checked property // isChecked is Boolean
 
-			this.todos.forEach(function (todo) {
-				todo.completed = isChecked;
+			this.todos.forEach(function (todo) {		// looop through each this.todos
+				todo.completed = isChecked;			// set todo.completed to isChecked
 			});
 
 			this.render();
 		},
+		/**
+		 * 	It should return Array of this.todos.completed that are false
+		 *	Parameters: N/A
+		 *	Return: (Array) of this.todos.completed that are false
+		 */
 		getActiveTodos: function () {
 			return this.todos.filter(function (todo) {
 				return !todo.completed;
 			});
 		},
+		/**
+		 * 	It should return Array of this.todos.completed that are false
+		 *	Parameters: N/A
+		 *	Return: (Array) of this.todos.completed that are true
+		 */
 		getCompletedTodos: function () {
 			return this.todos.filter(function (todo) {
 				return todo.completed;
 			});
 		},
+		/**
+		 * 	It should return Array of this.todos depending on there this.todos.completed status based on this.filter
+		 *	Parameters: N/A
+		 *	Return: (Array) of this.todos depending on there this.todos.completed status
+		 */
 		getFilteredTodos: function () {
 			if (this.filter === 'active') {
 				return this.getActiveTodos();
@@ -112,19 +137,24 @@ jQuery(function ($) {
 				return this.getCompletedTodos();
 			}
 
-			return this.todos;
+			return this.todos;		// basically this.filter === 'all' and return al the todos
 		},
+		/**
+		 * 	It should set this.todos to this.todos.completed that are false and set this.filter to all
+		 *	Parameters: N/A
+		 *	Return: N/A
+		 */
 		destroyCompleted: function () {
-			this.todos = this.getActiveTodos();
-			this.filter = 'all';
+			this.todos = this.getActiveTodos();		// Setting this.todos to this.todos.completed that are false will erase this.todos.completed that is true
+			this.filter = 'all';		// Setting it back to all with basically all the this.todos.completed that are false
 			this.render();
 		},
 		// accepts an element from inside the `.item` div and
 		// returns the corresponding index in the `todos` array
 		/**
 		 * 	It should return the this.todos index based on what was clicked.
-		 * 	Parameters: el ==> html element that was actioned on
-		 * 	Return: i ==> index of this.todos
+		 * 	Parameters: el (String) ==> html element that was actioned on
+		 * 	Return: i (Number) ==> index of this.todos
 		 */
 		getIndexFromEl: function (el) {		// from destroy: <button class="destroy"></button>
 			var id = $(el).closest('li').data('id');	// element that was clicked, it's ancestor that was li and get the data-id
@@ -155,9 +185,14 @@ jQuery(function ($) {
 
 			this.render();
 		},
+		/**
+		 * 	It should toggle true and false for this.todos[i].completed
+		 *	Parameters: e (jQuery event Object)
+		 *	Return: N/A
+		 */
 		toggle: function (e) {
-			var i = this.getIndexFromEl(e.target);
-			this.todos[i].completed = !this.todos[i].completed;
+			var i = this.getIndexFromEl(e.target);		// get the index position based on what is clicked
+			this.todos[i].completed = !this.todos[i].completed;		// give me the opposite of this.todos[i].completed
 			this.render();
 		},
 		editingMode: function (e) {
@@ -196,7 +231,7 @@ jQuery(function ($) {
 		/**
 		 *  It should delete one item from the this.todos based on index of a click
 		 * 	and update the page
-		 *	Parameters: e ==> jQuery Event object [https://api.jquery.com/category/events/event-object/]
+		 *	Parameters: e (jQuery Event object) [https://api.jquery.com/category/events/event-object/]
 		 *	Return: N/A
 		 */
 		destroy: function (e) {										

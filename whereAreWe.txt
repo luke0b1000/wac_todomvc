@@ -20,3 +20,27 @@
         Replicate parts of the app by hand (in the console).
         Make small changes and see what happens.
         Add a new feature.
+2. Event listeners, toggle, delete, filter
+    !Helps figure out what is this
+        function whatIsThis() {        // called from whatIsThis
+            console.log(this);
+        }
+    jQuery (this) gives you back the element that was actioned and then pass in jQuery Event Object if you don't bind(this)
+    function() {}  === whatIsThis so no need for whatIsThis() // even if you run it, undefined as no return value, if it has return value then it returns it
+    Also if you do put this.toggleAll(), it will run as soon as you load the site, and nothing will happen when you click it
+    
+    !Method Chaining
+    var myFakeElement = {
+        on: function(something) {
+            console.log('Running .on with ' + something);
+            return this;    // return myFakeElement{} for the next one to use
+        },
+        next: function(random) {
+            console.log('Running .next with ' + random);
+            return this;    // return this === myFakeElement{}
+        }
+    };
+    myFakeElement
+        .on('gordon')   // returned and then continue on with myFakeElement.on('james')
+        .on('james')   // returns with myFakeElement ready for the next one
+        .next(123);
