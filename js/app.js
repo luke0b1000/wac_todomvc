@@ -10,6 +10,11 @@ jQuery(function ($) {
 	var ESCAPE_KEY = 27;
 
 	var util = {
+		/**
+		 * 	It should return a unique string for this.todos[i].id
+		 *	Parameters: N/A
+		 *	Return: uuid (String) "7be238ad-1262-42dc-a3ca-21630e576d78"
+		 */
 		uuid: function () {
 			/*jshint bitwise:false */
 			var i, random;
@@ -25,6 +30,11 @@ jQuery(function ($) {
 
 			return uuid;
 		},
+		/**
+		 * 	It should add a 's' if count doesn't equal 1, otherwise don't add an 's' because count equals to 1
+		 *	Parameters: count (string), word (string)
+		 *	Return: count (string)
+		 */
 		pluralize: function (count, word) {
 			return count === 1 ? word : word + 's';
 		},
@@ -167,21 +177,27 @@ jQuery(function ($) {
 				}
 			}
 		},
+		/**
+		 * 	It should take input, trim it, and add it into this.todos, clear out the element
+		 *  This method executes this method every time a user keys up
+		 *	Parameters: e (jQuery Event Object)
+		 *	Return: undefined if you don't press enter, // executes this method every time a user keys up
+		 */
 		create: function (e) {
-			var $input = $(e.target);
-			var val = $input.val().trim();
+			var $input = $(e.target);		// e.target === <input id="new-todo" placeholder="What needs to be done?" autofocus="">, wrap in $(), will make it a jQuery Object
+			var val = $input.val().trim();	// $input.val() === what was typed in
 
-			if (e.which !== ENTER_KEY || !val) {
+			if (e.which !== ENTER_KEY || !val) {	// e.which is what was typed in in numerics  // if you remove this, basically everytime you keyup it will add it into the this.todos right away without even pressing ENTER
 				return;
 			}
 
-			this.todos.push({
-				id: util.uuid(),
+			this.todos.push({		// Add to this.todos an object with these values
+				id: util.uuid(),	
 				title: val,
 				completed: false
 			});
 
-			$input.val('');
+			$input.val('');		// clear out the element value, empty what was typed in
 
 			this.render();
 		},
@@ -195,34 +211,49 @@ jQuery(function ($) {
 			this.todos[i].completed = !this.todos[i].completed;		// give me the opposite of this.todos[i].completed
 			this.render();
 		},
+		/**
+		 * 	It should make active the css #todo-list li.editing because it added a class="editing" to <li>, displaying the input box, getting me the element of class="edit" and allowing me to edit those values
+		 *	Parameters: e (jQuery Event Object)
+		 *	Return: N/A
+		 */
 		editingMode: function (e) {
-			var $input = $(e.target).closest('li').addClass('editing').find('.edit');
-			var val = $input.val();
-			$input.val('').focus().val(val);
+			var $input = $(e.target).closest('li').addClass('editing').find('.edit'); // find element, find closest <li>, add <li class="editing">, get me the element <input class="edit">
+			var val = $input.val();		// Get me the value <input class="edit" value="VALUE HERE">
+			$input.val('').focus().val(val);	// Clear out the value, focus it back on the input box, and put in the value
 		},
+		/**
+		 * 	It should only do something when you hit ENTER or ESC. but lose focus either way
+		 *	Parameters: e (jQuery Event Object)
+		 *	Return: N/A
+		 */
 		editKeyup: function (e) {
-			if (e.which === ENTER_KEY) {
-				e.target.blur();
+			if (e.which === ENTER_KEY) {		// if you press ENTER
+				e.target.blur();				// lose focus on the input text box
 			}
 
-			if (e.which === ESCAPE_KEY) {
-				$(e.target).data('abort', true).blur();
+			if (e.which === ESCAPE_KEY) {				// if you press ESC
+				$(e.target).data('abort', true).blur();		// set the element to have data with key to 'abort' and value is true, and lose focus
 			}
 		},
+		/**
+		 * 	It should update the this.todos[i]
+		 *	Parameters: e (jQuery Event Object)
+		 *	Return: undefined if no value exist
+		 */
 		update: function (e) {
-			var el = e.target;
-			var $el = $(el);
-			var val = $el.val().trim();
+			var el = e.target;				// get the element actioned
+			var $el = $(el);				// convert to jquery object
+			var val = $el.val().trim();		// get the value of the element
 
-			if (!val) {
+			if (!val) {						// if no value or empty space delete
 				this.destroy(e);
 				return;
 			}
 
-			if ($el.data('abort')) {
-				$el.data('abort', false);
+			if ($el.data('abort')) {		// if this was set to true from editKeyup
+				$el.data('abort', false);	// set the value to false and don't update and do nothing more
 			} else {
-				this.todos[this.getIndexFromEl(el)].title = val;
+				this.todos[this.getIndexFromEl(el)].title = val;	// set the value of this.todos[i]
 			}
 
 			this.render();

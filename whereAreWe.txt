@@ -44,3 +44,5 @@
         .on('gordon')   // returned and then continue on with myFakeElement.on('james')
         .on('james')   // returns with myFakeElement ready for the next one
         .next(123);
+3. edit, editKeyup, update
+    
