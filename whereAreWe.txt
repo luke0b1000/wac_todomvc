@@ -73,3 +73,13 @@
     // "<div></div>"
     options.fn(this) will give you the class="selected" // options.inverse(this) will run the else part
     {{#eq filter 'completed'}}class="selected"{{else}}style="border: solid black 1px;"{{/eq}}
+5. localStorage, init
+    // localStorage can only store strings
+    localStorage.setItem('myNameSpace', JSON.stringify('myDATA'));
+    JSON.parse(localStorage.getItem('myNameSpace'));    // turn string into Object
+    Router is used to connect url with some code, director.js
+    url: #/ all      #/ completed        #/ active
+    /:filter  - :filter signifies a variable that equal to whatever is passed after the / and we use the filter variable to render
+    /watchandcode: function() {do whatever is here}
+    [https://hurricane-flower.glitch.me/]
+    [https://github.com/flatiron/director]

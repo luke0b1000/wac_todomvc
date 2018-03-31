@@ -41,29 +41,43 @@ jQuery(function ($) {
 		pluralize: function (count, word) {
 			return count === 1 ? word : word + 's';
 		},
+		/**
+		 * 	It should store this.todos or retrieve the todos based if 2 paramenters/arguements are passed in
+		 *	Parameters: namespace (String) 'todos-jquery', data (Array) of this.todos
+		 *	Return: JSON.parse(localStorage:this.todos) (Array) this.todos // set localStorage, JSON.stringify(this.todos)
+		 */
 		store: function (namespace, data) {
-			if (arguments.length > 1) {
-				return localStorage.setItem(namespace, JSON.stringify(data));
+			if (arguments.length > 1) {				// if there is more than 2 arguments, such as include data
+				return localStorage.setItem(namespace, JSON.stringify(data)); // put the JSON version of data into localStroage
 			} else {
-				var store = localStorage.getItem(namespace);
-				return (store && JSON.parse(store)) || [];
+				var store = localStorage.getItem(namespace);	// retrieve the items from 'todos-jquery'
+				return (store && JSON.parse(store)) || [];		// returns JSON.parse(store) or empty [] if no data // turn string into object
 			}
 		}
 	};
-
+	
 	var App = {
+		/**
+		 * 	It should start the app, by initialzing the this.todos from localStorage
+		 *  creating handlbars template
+		 *  creating the event listeners
+		 *  setting up the url
+		 *  displaying the website
+		 *	Parameters: N/A
+		 *	Return: N/A
+		 */
 		init: function () {
-			this.todos = util.store('todos-jquery');
+			this.todos = util.store('todos-jquery');	// initialize this.todos to localStorage or [] (firsttime)
 			this.todoTemplate = Handlebars.compile($('#todo-template').html());		// get <script id="todo-template" and the html and turn it into handlebars template
-			this.footerTemplate = Handlebars.compile($('#footer-template').html());
+			this.footerTemplate = Handlebars.compile($('#footer-template').html()); // ^^^
 			this.bindEvents();		// Create event listeners for all the possible actions
 
 			new Router({
-				'/:filter': function (filter) {
+				'/:filter': function (filter) {		// :filter variable to be used to display portions of the site
 					this.filter = filter;
 					this.render();
-				}.bind(this)
-			}).init('/all');
+				}.bind(this)		// bind to App object
+			}).init('/all');		// startat /all if nothing else is there
 		},
 		/**
 		 * 	It should bind each HTML element to an action and run a specific function. this === App object {} // the this is App object pass into the bind(this), which pass into the method, otherwise inside that method this, refers to the element clicked
